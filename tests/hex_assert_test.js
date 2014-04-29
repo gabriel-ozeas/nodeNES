@@ -1,4 +1,5 @@
 var hexAssert = require('../lib/tests/hex-assert.js');
+var colors = require('colors');
 
 exports.should_not_throw_excep_when_eq = function(test) {
 	hexAssert.equals([0x1A], [0x1A]);
@@ -7,7 +8,7 @@ exports.should_not_throw_excep_when_eq = function(test) {
 exports.should_throw_excep_when_diff = function(test) {
 	var exception = null;
 	try {
-		hexAssert.equals([0x1A], [0x1B]);
+		hexAssert.equals([0x1A, 0x1B], [0x1A, 0x1A]);
 		test.fail('Should throw HexaAssertionException');
 	} catch (e) {
 		exception = e;
@@ -15,9 +16,29 @@ exports.should_throw_excep_when_diff = function(test) {
 
 	test.equals(1, exception.stack.toString().match(/Expected/ig).length);
 	test.equals(1, exception.stack.toString().match(/Actual/ig).length);
+	test.ok(exception.stack.toString().indexOf('1A' + '1B'.green) !== -1);
+	test.ok(exception.stack.toString().indexOf('1A' + '1A'.red) !== -1);
 
 	test.done();
 };
+
+exports.should_show_custom_message = function(test) {
+	var exception = null;
+
+	try {
+		hexAssert.equals([0x1A], [0x1B], 'Custom Assertion Message');
+		test.fail('Should throw HexaAssertionException');
+	} catch (e) {
+		exception = e;
+	}
+
+	test.equals(1, exception.stack.toString().match(/Expected/ig).length);
+	test.equals(1, exception.stack.toString().match(/Actual/ig).length);
+	test.equals(1, exception.stack.toString().match(/Custom Assertion Message/ig).length);
+
+	test.done();
+};
+
 exports.should_throw_excep_when_some_diff = function(test) {
 	var exception = null;
 	try {
